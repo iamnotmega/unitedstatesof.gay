@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tax Declaration | United States of Gay</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Loading Overlay for Data Fetching */
+        #sync-overlay {
+            position: fixed; inset: 0; background: #fff; z-index: 2000;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+
+        .tax-grid { display: grid; grid-template-columns: 1fr 350px; gap: 30px; margin-top: 20px; }
+        .tax-card { background: white; border: 1px solid var(--usg-border); padding: 30px; border-top: 8px solid var(--usg-primary); position: relative; }
+        .summary-table { width: 100%; margin: 20px 0; border-collapse: collapse; }
+        .summary-table td { padding: 12px 0; border-bottom: 1px solid #eee; }
+        .summary-table td:last-child { text-align: right; font-weight: bold; }
+        
+        .total-highlight { background: var(--usg-primary); color: white; padding: 20px; border-radius: 4px; margin-top: 20px; text-align: center; }
+        .hidden { display: none !important; }
+
+        /* PIN2 Red Design */
+        .pin2-warning { color: var(--usg-error); font-weight: bold; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 15px; text-transform: uppercase; font-size: 13px; text-align: center; }
+        
+        /* Keypad Styles */
+        .key { 
+            opacity: 1 !important; 
+            background: #fff;
+            border: 1px solid #ddd;
+            padding: 15px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+        .key:active { background: #eee; }
+
+        .mobile-check-icon { font-size: 3rem; margin-bottom: 20px; text-align: center; animation: phonePulse 1.5s infinite; }
+        
+        @keyframes phonePulse {
+            0%, 100% { transform: translateY(0); opacity: 0.6; }
+            50% { transform: translateY(-10px); opacity: 1; }
+        }
+    </style>
+</head>
+<body style="display:block; background:#f9f9f9;">
+
+    <div id="sync-overlay">
+        <div class="spinner"></div>
+        <h2 id="sync-text" style="margin-top:20px;">Fetching National Income Data...</h2>
+        <p style="color:#666;">Securing connection to Federal Revenue Vault</p>
+    </div>
+
+    <div class="gov-banner">Official Tax Declaration Form 1040-S | United States of Gay</div>
+    
+    <header>
+        <img src="favicon.png" class="seal" alt="USG Seal">
+        <div class="header-title">
+            <h1>Bureau of Internal Revenue</h1>
+            <span>E-Tax Declaration & Billing</span>
+        </div>
+        <div id="auth-status" style="margin-left:auto; font-size:13px; text-align:right;"></div>
+    </header>
+
+    <main id="main-content" class="hidden" style="padding: 40px;">
+        <div class="tax-grid">
+            <div class="tax-card">
+                <h2>Taxpayer Summary</h2>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
+                    <div>
+                        <label style="font-size:11px; font-weight:bold; color:#777; text-transform:uppercase;">Legal Name</label>
+                        <p style="margin:5px 0; font-weight:bold;">Citizen</p>
+                    </div>
+                    <div>
+                        <label style="font-size:11px; font-weight:bold; color:#777; text-transform:uppercase;">National ID</label>
+                        <p style="margin:5px 0; font-weight:bold;" id="sidebar-id">---</p>
+                    </div>
+                </div>
+
+                <h3 style="margin-top:40px; border-bottom: 2px solid var(--usg-primary); padding-bottom: 10px;">Tax Breakdown (Rate: 25%)</h3>
+                <table class="summary-table">
+                    <tr><td>National Silliness Tax (NST)</td><td>15%</td></tr>
+                    <tr><td>Public Headpat Infrastructure</td><td>5%</td></tr>
+                    <tr><td>Anti-Hater Defense Levy</td><td>2%</td></tr>
+                    <tr><td>Little Guy Small-Business Tax</td><td>3%</td></tr>
+                </table>
+            </div>
+
+            <div class="tax-card" style="border-top-color: var(--usg-error);">
+                <h3 style="color:var(--usg-error);">Balance Due</h3>
+                <table class="summary-table">
+                    <tr><td>Gross Income</td><td>USG$ <span id="gross-val">0</span></td></tr>
+                    <tr><td>Deductions</td><td>- USG$ <span id="deduct-val">0</span></td></tr>
+                </table>
+                <div class="total-highlight">
+                    <span style="font-size: 11px; text-transform: uppercase; opacity: 0.9;">Total Payable:</span><br>
+                    <strong style="font-size: 1.8rem;">USG$ <span id="total-val">0</span></strong>
+                </div>
+
+                <button class="usa-button" style="width:100%; background:var(--usg-error); margin-top:25px; font-size: 1.1rem;" onclick="openSignModal()">
+                    Sign & Pay
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <div id="modal-overlay" class="modal-overlay">
+        <div class="modal" style="position: relative; min-height: 400px; display: flex; flex-direction: column; justify-content: center;">
+            
+            <div id="stage-app-check">
+                <div class="pin2-warning">Signing with PIN2</div>
+                <div class="mobile-check-icon">📱</div>
+                <h3 style="margin:0; text-align:center;">Confirm on App</h3>
+                <p style="font-size: 14px; color: #666; text-align:center;">Open Smart-Gay-ID on your device.</p>
+                <div class="spinner" style="width:25px; height:25px; border-width: 3px; margin: 20px auto;"></div>
+            </div>
+
+            <div id="stage-pin-entry" class="hidden">
+                <div class="pin2-warning">Enter PIN2</div>
+                <p style="font-size: 14px; color: #666; text-align:center;">Authorize USG$ <span id="modal-total-val">...</span></p>
+                <div class="pin-dots" id="dots"></div>
+                <div class="keypad">
+                    <button class="key" onclick="press('1')">1</button><button class="key" onclick="press('2')">2</button><button class="key" onclick="press('3')">3</button>
+                    <button class="key" onclick="press('4')">4</button><button class="key" onclick="press('5')">5</button><button class="key" onclick="press('6')">6</button>
+                    <button class="key" onclick="press('7')">7</button><button class="key" onclick="press('8')">8</button><button class="key" onclick="press('9')">9</button>
+                    <button class="key" onclick="press('C')" style="background:#ffcccb; font-size: 11px; font-weight: bold;">CLR</button>
+                    <button class="key" onclick="press('0')">0</button>
+                </div>
+            </div>
+
+            <div id="stage-final" class="hidden">
+                <div id="spinner-final" class="spinner" style="margin: 0 auto;"></div>
+                <div id="check-final" class="success-checkmark hidden" style="text-align:center;">✓</div>
+                <h3 id="stat-text" style="margin-top:20px; text-align:center;">Processing...</h3>
+            </div>
+
+            <div id="corner-code-container" style="position: absolute; bottom: 15px; right: 20px; text-align: right;">
+                <span style="font-size: 10px; text-transform: uppercase; color: #999; font-weight: bold; display: block; margin-bottom: -5px;">Control Code</span>
+                <strong id="c-code-display" style="color: var(--usg-primary); font-size: 1.4rem; font-family: monospace; letter-spacing: 1px;">----</strong>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let pin = "";
+        let currentTotal = "";
+
+        window.onload = function() {
+            // Auth Guard
+            if(localStorage.getItem('usg_auth') !== 'true') window.location.href = 'login.html';
+            
+            const userID = localStorage.getItem('usg_id');
+            document.getElementById('sidebar-id').innerText = userID;
+            document.getElementById('auth-status').innerHTML = `ID: <strong>${userID}</strong>`;
+
+            // Randomize Figures
+            const gross = Math.floor(Math.random() * (95000 - 35000) + 35000);
+            const deduct = Math.floor(Math.random() * (4000 - 1500) + 1500);
+            const total = Math.floor((gross - deduct) * 0.25);
+            currentTotal = total.toLocaleString() + ".00";
+
+            document.getElementById('gross-val').innerText = gross.toLocaleString() + ".00";
+            document.getElementById('deduct-val').innerText = deduct.toLocaleString() + ".00";
+            document.getElementById('total-val').innerText = currentTotal;
+            document.getElementById('modal-total-val').innerText = currentTotal;
+
+            // Loading Animation
+            setTimeout(() => {
+                document.getElementById('sync-text').innerText = "Generating Billing Signature...";
+                setTimeout(() => {
+                    document.getElementById('sync-overlay').classList.add('hidden');
+                    document.getElementById('main-content').classList.remove('hidden');
+                }, 1000);
+            }, 1200);
+        };
+
+        function openSignModal() {
+            // Generate Code for Bottom Right
+            const code = Math.floor(1000 + Math.random()*9000);
+            document.getElementById('c-code-display').innerText = code;
+            
+            document.getElementById('modal-overlay').style.display = 'flex';
+            
+            // Switch to PIN entry after simulation
+            setTimeout(() => {
+                document.getElementById('stage-app-check').classList.add('hidden');
+                document.getElementById('stage-pin-entry').classList.remove('hidden');
+            }, 2500);
+        }
+
+        function press(n) {
+            if(n === 'C') pin = ""; else pin += n;
+            document.getElementById('dots').innerText = "•".repeat(pin.length);
+            
+            if(pin.length === 5) {
+                document.getElementById('stage-pin-entry').classList.add('hidden');
+                document.getElementById('corner-code-container').classList.add('hidden'); // Hide code on success
+                document.getElementById('stage-final').classList.remove('hidden');
+                
+                setTimeout(() => {
+                    document.getElementById('spinner-final').style.display = 'none';
+                    document.getElementById('check-final').classList.remove('hidden');
+                    
+                    document.getElementById('stat-text').innerText = "USG$ " + currentTotal + " paid successfully";
+                    document.getElementById('stat-text').style.color = "var(--usg-success)";
+                    
+                    setTimeout(() => window.location.href = 'index.html', 2200);
+                }, 2000);
+            }
+        }
+    </script>
+</body>
+</html>
