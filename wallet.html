@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>National Wallet | USG</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="favicon.png">
+    <style>
+        .wallet-container { max-width: 800px; margin: 40px auto; padding: 20px; }
+        .balance-card { background: var(--usg-primary); color: white; padding: 40px; border-radius: 8px; text-align: center; margin-bottom: 30px; }
+        
+        /* Interactive Transaction List */
+        .history-list { background: white; border: 1px solid var(--usg-border); border-radius: 8px; overflow: hidden; }
+        .tx-entry { border-bottom: 1px solid #eee; transition: background 0.2s; }
+        .tx-entry:last-child { border-bottom: none; }
+        
+        .tx-summary { 
+            padding: 15px 20px; display: flex; justify-content: space-between; 
+            align-items: center; cursor: pointer; user-select: none;
+        }
+        .tx-summary:hover { background: #fcfcfc; }
+        
+        .tx-details { 
+            padding: 0 20px; max-height: 0; overflow: hidden; 
+            transition: max-height 0.3s ease-out, padding 0.3s ease;
+            background: #f8f9fa;
+        }
+        .tx-entry.active .tx-details { 
+            max-height: 200px; padding: 15px 20px; border-top: 1px solid #eee;
+        }
+
+        .info-label { font-size: 10px; text-transform: uppercase; color: #888; font-weight: bold; display: block; margin-bottom: 4px; }
+        .info-value { font-family: monospace; font-size: 13px; color: #333; margin-bottom: 10px; display: block; }
+
+        .amount-pos { color: var(--usg-success); font-weight: bold; }
+        .amount-neg { color: var(--usg-error); font-weight: bold; }
+    </style>
+</head>
+<body style="display:block; background:#f9f9f9;">
+    <div class="gov-banner">Federal Digital Asset Management</div>
+    <header>
+        <img src="favicon.png" class="seal" alt="USG Seal" onclick="location.href='index.html'" style="cursor:pointer;">
+        <div class="header-title"><h1>National Wallet</h1><span>Secure Treasury Portal</span></div>
+    </header>
+
+    <main class="wallet-container">
+        <div class="balance-card">
+            <span style="text-transform:uppercase; font-size:12px; opacity:0.8;">Total Available Balance</span>
+            <h1 id="wall-bal" style="font-size: 3rem; margin: 10px 0;">USG$ 0.00</h1>
+            <button class="usa-button" style="background:white; color:var(--usg-primary); border:none;">Transfer Funds</button>
+        </div>
+
+        <h3>Transaction History</h3>
+        <div class="history-list" id="tx-history-container">
+            </div>
+    </main>
+
+    <script>
+        window.onload = function() {
+            if(localStorage.getItem('usg_auth') !== 'true') window.location.href = 'login.html';
+            
+            // Render Balance
+            const bal = parseFloat(localStorage.getItem('usg_balance') || "0");
+            const balEl = document.getElementById('wall-bal');
+            balEl.innerText = "USG$ " + bal.toLocaleString(undefined, {minimumFractionDigits:2});
+            if(bal < 0) balEl.style.color = "#ffcccb";
+
+            // Render Transactions
+            const history = JSON.parse(localStorage.getItem('usg_transactions') || "[]");
+            const container = document.getElementById('tx-history-container');
+            
+            if(history.length === 0) {
+                container.innerHTML = `<div style="padding:40px; text-align:center; color:#888;">No recent transactions found.</div>`;
+            } else {
+                container.innerHTML = history.map((tx, index) => `
+                    <div class="tx-entry" id="tx-${index}">
+                        <div class="tx-summary" onclick="toggleTx(${index})">
+                            <div>
+                                <span style="font-size: 12px; color: #666;">${tx.date.split(',')[0]}</span><br>
+                                <strong>${tx.desc}</strong>
+                            </div>
+                            <div class="${tx.amount < 0 ? 'amount-neg' : 'amount-pos'}">
+                                ${tx.amount < 0 ? '-' : '+'} USG$ ${Math.abs(tx.amount).toLocaleString(undefined, {minimumFractionDigits: 2})}
+                            </div>
+                        </div>
+                        <div class="tx-details">
+                            <span class="info-label">Full Federal Timestamp</span>
+                            <span class="info-value">${tx.date}</span>
+                            
+                            <span class="info-label">Transaction ID</span>
+                            <span class="info-value">TXN-${Math.random().toString(36).substr(2, 9).toUpperCase()}</span>
+                            
+                            <span class="info-label">Status</span>
+                            <span class="info-value" style="color:var(--usg-success);">✓ SETTLED</span>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        };
+
+        function toggleTx(index) {
+            const el = document.getElementById(`tx-${index}`);
+            // Toggle active class to expand/collapse
+            el.classList.toggle('active');
+        }
+    </script>
+</body>
+</html>

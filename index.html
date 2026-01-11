@@ -33,20 +33,16 @@
             animation: pulse 2s infinite;
         }
 
-        /* --- Sidebar Navigation feedback --- */
-        nav li a {
-            transition: all 0.2s ease;
-        }
-
+        nav li a { transition: all 0.2s ease; }
         nav li a:hover {
             padding-left: 32px !important;
             color: var(--usg-accent) !important;
             background: #f0f3f5;
         }
 
-        /* --- Card Hover Logic --- */
         .usa-card {
             transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
+            display: flex; flex-direction: column;
         }
 
         .usa-card:hover {
@@ -54,16 +50,20 @@
             box-shadow: 0 12px 24px rgba(0,0,0,0.08);
         }
 
-        #login-promo {
-            transition: opacity 0.4s ease, transform 0.4s ease;
+        .id-badge {
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 6px;
+            transition: background 0.2s;
         }
+        .id-badge:hover { background: rgba(0, 113, 188, 0.05); }
+
+        .balance-preview { font-weight: bold; font-family: monospace; }
     </style>
 </head>
 <body>
 
-    <div class="gov-banner">
-        An official website of the United States of Gay government
-    </div>
+    <div class="gov-banner">An official website of the United States of Gay government</div>
     
     <header>
         <img src="favicon.png" class="seal" alt="USG Seal">
@@ -79,8 +79,8 @@
     <nav>
         <ul>
             <li><a href="index.html" style="background: #ececec; border-left: 4px solid var(--usg-primary);">Home</a></li>
-            <li><a href="report.html">Report a Silliness</a></li>
-            <li><a href="taxes.html">Apply for Headpat Credit</a></li>
+            <li><a href="wallet.html">National Wallet</a></li>
+            <li><a href="taxes.html">Tax Declaration</a></li>
             <li><a href="security.html">Security & Privacy</a></li>
             <li id="logout-item" style="display:none; margin-top: 20px;">
                 <a href="#" onclick="logout()" style="color:var(--usg-error); border-top: 1px solid var(--usg-border);">Log out of USG-ID</a>
@@ -91,24 +91,25 @@
     <main>
         <section id="hero">
             <h2 style="margin-top:0;">Federal Dashboard</h2>
-            <p style="font-size:1.25rem; color:#444; max-width: 800px; line-height: 1.6;">
-                The central portal for USG citizens. Access secure federal applications, manage your identity, and interact with the Bureau of Internal Silliness.
+            <p style="font-size:1.2rem; color:#444; max-width: 800px; line-height: 1.6;">
+                Access secure federal applications and manage your citizen identity.
             </p>
         </section>
 
         <div class="usa-card-group">
             <div class="usa-card">
-                <h3 style="margin-top:0; color:var(--usg-primary);">Department of Justice</h3>
+                <h3 style="margin-top:0; color:var(--usg-primary);">National Wallet</h3>
                 <p style="color:#555; font-size: 0.95rem; flex-grow: 1;">
-                    Monitor federal investigations into anti-silly activities. Authenticated users may file formal affidavits and view case dockets.
+                    Monitor your USG$ holdings, federal subsidies, and transaction history. 
                 </p>
-                <a href="report.html" class="usa-button">Open Case Tracker</a>
+                <div id="balance-display-main" style="margin-bottom: 15px; font-size: 1.2rem;">--</div>
+                <a href="wallet.html" class="usa-button">Access Wallet</a>
             </div>
 
             <div class="usa-card">
                 <h3 style="margin-top:0; color:var(--usg-primary);">Internal Revenue</h3>
                 <p style="color:#555; font-size: 0.95rem; flex-grow: 1;">
-                    File your annual headpat declaration. Ensure your silliness income is correctly reported for the 2026 fiscal cycle.
+                    File your annual headpat declaration for the 2026 fiscal cycle.
                 </p>
                 <a href="taxes.html" class="usa-button">File Declaration</a>
             </div>
@@ -120,21 +121,10 @@
             <div>
                 <img src="favicon.png" width="50" style="margin-bottom: 15px;"><br>
                 <strong>United States of Gay Federal Government</strong><br>
-                Official Federal Portal <br>
                 Silly District, D.C.
-            </div>
-            <div style="text-align:right;">
-                <nav style="background: transparent; border: none;">
-                    <ul style="display: flex; gap: 20px;">
-                        <li><a href="#" style="color:white; border:none; padding:0; font-size: 13px;">Privacy Policy</a></li>
-                        <li><a href="#" style="color:white; border:none; padding:0; font-size: 13px;">FOIA</a></li>
-                        <li><a href="#" style="color:white; border:none; padding:0; font-size: 13px;">Accessibility</a></li>
-                    </ul>
-                </nav>
             </div>
         </div>
         <div style="margin-top:50px; font-size:11px; color:#adb5bd; text-align:center; border-top: 1px solid #444; padding-top: 20px;">
-            All digital signatures and federal filings are legally binding under the National Silliness Act. <br>
             &copy; 2026 United States of Gay Government.
         </div>
     </footer>
@@ -143,43 +133,44 @@
         window.onload = function() {
             const isAuth = localStorage.getItem('usg_auth') === 'true';
             const statusArea = document.getElementById('auth-status');
-            const loginPromo = document.getElementById('login-promo');
             const logoutItem = document.getElementById('logout-item');
+
+            // Initialize Balance if it doesn't exist
+            if(!localStorage.getItem('usg_balance')) {
+                localStorage.setItem('usg_balance', "42069.00");
+            }
 
             if(isAuth) {
                 const userID = localStorage.getItem('usg_id');
-                // Update Header Status
+                const balance = parseFloat(localStorage.getItem('usg_balance'));
+                
+                // Color logic
+                let bColor = "black";
+                if(balance > 0) bColor = "var(--usg-success)";
+                if(balance < 0) bColor = "var(--usg-error)";
+
+                // Update Header Status with Link to Profile
                 statusArea.innerHTML = `
-                    <div style="display:flex; align-items:center; justify-content:flex-end;">
-                        <span class="auth-pulse"></span>
-                        <div style="text-align:right">
-                            <strong>Personal ID: ${userID}</strong><br>
-                            <span style="color:var(--usg-success); font-weight:700;">Active Federal Session</span>
+                    <div class="id-badge" onclick="location.href='profile.html'">
+                        <div style="display:flex; align-items:center; justify-content:flex-end;">
+                            <span class="auth-pulse"></span>
+                            <div style="text-align:right">
+                                <strong>ID: ${userID}</strong><br>
+                                <span class="balance-preview" style="color:${bColor}">USG$ ${balance.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
+                            </div>
                         </div>
                     </div>
                 `;
                 
-                // Remove Login Promo with a smooth fade
-                if(loginPromo) {
-                    loginPromo.style.opacity = '0';
-                    loginPromo.style.transform = 'scale(0.95)';
-                    setTimeout(() => loginPromo.style.display = 'none', 400);
-                }
-
-                // Show logout in sidebar
                 logoutItem.style.display = 'block';
-
-                // Personalize Hero
                 document.querySelector('#hero h2').innerText = "Welcome back, Citizen";
+                document.getElementById('balance-display-main').innerHTML = `Current: <strong style="color:${bColor}">USG$ ${balance.toLocaleString()}</strong>`;
             }
         };
 
         function logout() {
-            // Smooth logout transition
-            document.body.style.opacity = '0.5';
-            document.body.style.transition = 'opacity 0.3s ease';
             localStorage.clear();
-            setTimeout(() => location.reload(), 300);
+            location.reload();
         }
     </script>
 </body>

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Citizen Profile | USG</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="favicon.png">
+    <style>
+        .profile-container { display: grid; grid-template-columns: 250px 1fr; gap: 40px; margin-top: 30px; }
+        .pfp-box { 
+            width: 250px; height: 250px; background: white; border: 2px solid var(--usg-border); border-radius: 8px;
+            overflow: hidden; display: flex; align-items: center; justify-content: center;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+        }
+        #pfp-img { width: 80%; height: 80%; object-fit: contain; }
+        .data-row { display: flex; justify-content: space-between; padding: 15px 0; border-bottom: 1px solid #eee; }
+    </style>
+</head>
+<body style="display:block; background:#f9f9f9;">
+    <div class="gov-banner">Official Citizen Identity Records</div>
+    <header>
+        <img src="favicon.png" class="seal" alt="USG Seal" onclick="location.href='index.html'" style="cursor:pointer;">
+        <div class="header-title">
+            <h1>National Identity Vault</h1>
+            <span>United States of Gay</span>
+        </div>
+    </header>
+
+    <main style="padding: 40px; max-width: 900px; margin: 0 auto;">
+        <div class="profile-container">
+            <div style="text-align: center;">
+                <div class="pfp-box">
+                    <img src="favicon.png" id="pfp-img" alt="Official Citizen Portrait">
+                </div>
+            </div>
+
+            <div style="background:white; padding: 30px; border:1px solid var(--usg-border);">
+                <h2 style="margin-top:0;">National Record: <span id="p-id">---</span></h2>
+                
+                <div class="data-row">
+                    <span>Legal Name</span>
+                    <span style="font-family:monospace;">Citizen</span>
+                </div>
+                
+                <div class="data-row">
+                    <span>Financial Standing</span>
+                    <span id="p-balance" style="font-family:monospace;">USG$ 0.00</span>
+                </div>
+
+                <div class="data-row">
+                    <span>Account Status</span>
+                    <span style="color:var(--usg-success); font-weight:bold;">VERIFIED</span>
+                </div>
+
+                <button class="usa-button" onclick="location.href='wallet.html'" style="margin-top:20px; width:100%;">Access Wallet</button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        window.onload = function() {
+            if(localStorage.getItem('usg_auth') !== 'true') window.location.href = 'login.html';
+            
+            // Set ID
+            document.getElementById('p-id').innerText = localStorage.getItem('usg_id');
+            
+            // Set Balance
+            const bal = parseFloat(localStorage.getItem('usg_balance') || "0");
+            const balEl = document.getElementById('p-balance');
+            balEl.innerText = "USG$ " + bal.toLocaleString(undefined, {minimumFractionDigits:2});
+            
+            // Dynamic Color Logic
+            if(bal > 0) balEl.style.color = "var(--usg-success)";
+            else if(bal < 0) balEl.style.color = "var(--usg-error)";
+            else balEl.style.color = "black";
+        };
+    </script>
+</body>
+</html>
