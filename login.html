@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Login | United States of Gay</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Component Specific Animations */
+        @keyframes modalSpring {
+            0% { transform: scale(0.85) translateY(30px); opacity: 0; }
+            100% { transform: scale(1) translateY(0); opacity: 1; }
+        }
+
+        @keyframes keyFade {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        @keyframes phonePulse {
+            0%, 100% { transform: translateY(0); opacity: 0.6; }
+            50% { transform: translateY(-10px); opacity: 1; }
+        }
+
+        @keyframes checkBounce {
+            0% { transform: scale(0); transform: rotate(-45deg); }
+            100% { transform: scale(1); transform: rotate(0deg); }
+        }
+
+        /* Modal Layouts */
+        .login-frame { 
+            max-width: 450px; 
+            margin: 100px auto; 
+            padding: 40px; 
+            background: white;
+            border: 1px solid var(--usg-border); 
+            border-top: 8px solid var(--usg-primary);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            animation: pageEntry 0.6s ease-out;
+        }
+
+        .modal-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0, 39, 76, 0.9);
+            backdrop-filter: blur(8px);
+            display: none; align-items: center; justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal {
+            background: white; width: 340px; padding: 30px; border-radius: 8px;
+            text-align: center; box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+            animation: modalSpring 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .hidden { display: none !important; }
+
+        .mobile-check-icon { font-size: 3rem; margin-bottom: 20px; animation: phonePulse 1.5s infinite; }
+        
+        .key { opacity: 0; } /* Set to 0 so the stagger JS can fade them in */
+        
+        .success-checkmark {
+            font-size: 60px; color: var(--usg-success);
+            animation: checkBounce 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--usg-accent) !important;
+            box-shadow: 0 0 0 3px rgba(0, 113, 188, 0.2);
+        }
+    </style>
+</head>
+<body style="display:block; background:#f9f9f9;">
+
+    <div class="gov-banner">
+        An official website of the United States of Gay government
+    </div>
+
+    <div class="login-frame">
+        <h2 style="margin-top:0;">Secure Authentication</h2>
+        <p style="color:#555; font-size: 0.95rem; line-height: 1.5;">
+            Enter your 11-digit USG-ID to initiate a secure handshake. Authentication is required for all federal digital signatures.
+        </p>
+
+        <div style="margin-top:25px;">
+            <label style="font-weight:700; font-size: 14px; display:block; margin-bottom:8px; color:var(--usg-primary);">USG-ID Number</label>
+            <input type="text" id="id-input" placeholder="391XXXXXXXX" maxlength="11" 
+                   oninput="validateID(this)"
+                   style="width:100%; padding:14px; font-size:1.2rem; border: 2px solid #555; border-radius: 4px; font-family: monospace;">
+            <p style="font-size: 12px; color: #777; margin-top: 8px;">Format: Starts with 391 followed by 8 digits.</p>
+        </div>
+
+        <button class="usa-button" style="width:100%; margin-top: 20px;" onclick="triggerHandshake()">
+            Authenticate with Smart-Gay-ID
+        </button>
+        
+        <div style="margin-top:20px; text-align:center;">
+            <a href="index.html" style="font-size: 13px; color: var(--usg-accent);">Return to Public Dashboard</a>
+        </div>
+    </div>
+
+    <div id="modal-overlay" class="modal-overlay">
+        <div class="modal">
+            
+            <div id="stage-app-check">
+                <div class="mobile-check-icon">📱</div>
+                <h3 style="margin:0;">Confirm on App</h3>
+                <p style="font-size: 14px; color: #666;">Verification code sent to your device.</p>
+                <div style="background: #f0f3f5; padding: 10px; border-radius: 4px; margin: 15px 0;">
+                    <span style="font-size: 12px; text-transform: uppercase; color: #888;">Control Code</span><br>
+                    <strong id="c-code-app" style="color:var(--usg-primary); font-size:1.8rem; letter-spacing: 2px;">----</strong>
+                </div>
+                <div class="spinner" style="width:25px; height:25px; border-width: 3px;"></div>
+            </div>
+
+            <div id="stage-pin-entry" class="hidden">
+                <h3 style="margin:0;">Enter PIN1</h3>
+                <p style="font-size: 14px; color: #666;">Code: <strong id="c-code-pin">----</strong></p>
+                <div class="pin-dots" id="dots"></div>
+                <div class="keypad">
+                    <button class="key" onclick="press('1')">1</button><button class="key" onclick="press('2')">2</button><button class="key" onclick="press('3')">3</button>
+                    <button class="key" onclick="press('4')">4</button><button class="key" onclick="press('5')">5</button><button class="key" onclick="press('6')">6</button>
+                    <button class="key" onclick="press('7')">7</button><button class="key" onclick="press('8')">8</button><button class="key" onclick="press('9')">9</button>
+                    <button class="key" onclick="press('C')" style="background:#ffcccb; font-size: 11px; font-weight: bold;">CLR</button>
+                    <button class="key" onclick="press('0')">0</button>
+                    <button class="key" style="visibility: hidden;"></button>
+                </div>
+            </div>
+
+            <div id="stage-final" class="hidden">
+                <div id="spinner-final" class="spinner"></div>
+                <div id="check-final" class="success-checkmark hidden">✓</div>
+                <h3 id="stat-text" style="margin-top:20px;">Verifying Signature...</h3>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let pin = "";
+
+        // Force 391 Start and 11-digit numeric cap
+        function validateID(i) {
+            i.value = i.value.replace(/\D/g, '');
+            if(i.value.length > 0 && !i.value.startsWith('391')) {
+                i.value = '391';
+            }
+        }
+
+        function triggerHandshake() {
+            const idVal = document.getElementById('id-input').value;
+            if(idVal.length !== 11) {
+                alert("Federal Access Error: USG-ID must be exactly 11 digits.");
+                return;
+            }
+
+            const code = Math.floor(1000 + Math.random()*9000);
+            document.getElementById('c-code-app').innerText = code;
+            document.getElementById('c-code-pin').innerText = code;
+
+            document.getElementById('modal-overlay').style.display = 'flex';
+
+            // Simulate the delay while "waiting for user to tap notification"
+            setTimeout(() => {
+                document.getElementById('stage-app-check').classList.add('hidden');
+                document.getElementById('stage-pin-entry').classList.remove('hidden');
+                
+                // Staggered keypad entrance
+                document.querySelectorAll('.key').forEach((key, index) => {
+                    key.style.animation = `keyFade 0.3s ease forwards ${index * 0.04}s`;
+                });
+            }, 2400);
+        }
+
+        function press(n) {
+            if(n === 'C') {
+                pin = "";
+            } else {
+                pin += n;
+            }
+            document.getElementById('dots').innerText = "•".repeat(pin.length);
+            
+            if(pin.length === 4) {
+                document.getElementById('stage-pin-entry').classList.add('hidden');
+                document.getElementById('stage-final').classList.remove('hidden');
+                
+                // Final Success Sequence
+                setTimeout(() => {
+                    document.getElementById('spinner-final').style.display = 'none';
+                    document.getElementById('check-final').classList.remove('hidden');
+                    document.getElementById('stat-text').innerText = "Authenticated Successfully";
+                    document.getElementById('stat-text').style.color = "var(--usg-success)";
+                    
+                    setTimeout(() => {
+                        localStorage.setItem('usg_auth', 'true');
+                        localStorage.setItem('usg_id', document.getElementById('id-input').value);
+                        window.location.href = 'index.html';
+                    }, 1400);
+                }, 2000);
+            }
+        }
+    </script>
+</body>
+</html>
